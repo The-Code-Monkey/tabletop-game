@@ -1,0 +1,32 @@
+const ZERO = 0;
+const TWO = 2;
+const EIGHT = 8;
+const THREE = 3;
+const ONE_POINT_EIGHT = 1.8;
+
+const TILE_SIZE = 128;
+
+const TICK_RATE = 60_000;
+const MAP_WIDTH = 10;
+const MAP_HEIGHT = 10;
+
+const HEXAGON_SIDES = 6;
+const CANVAS_BACKGROUND_COLOR = "black";
+const CANVAS_PADDING = 50;
+const OFFSCREEN_THRESHOLD = 300;
+
+export {
+  CANVAS_BACKGROUND_COLOR,
+  CANVAS_PADDING,
+  EIGHT,
+  HEXAGON_SIDES,
+  MAP_HEIGHT,
+  MAP_WIDTH,
+  OFFSCREEN_THRESHOLD,
+  ONE_POINT_EIGHT,
+  THREE,
+  TICK_RATE,
+  TILE_SIZE,
+  TWO,
+  ZERO,
+};
