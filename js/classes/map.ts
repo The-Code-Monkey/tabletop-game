@@ -3,17 +3,15 @@ import {
   CANVAS_BACKGROUND_COLOR,
   CANVAS_PADDING,
   EIGHT,
-  HEXAGON_SIDES,
   MAP_HEIGHT,
   MAP_WIDTH,
   OFFSCREEN_THRESHOLD,
-  ONE_POINT_EIGHT,
-  THREE,
   TILE_SIZE,
   TWO,
   ZERO,
 } from "../utils/constants";
 import type Player from "./player";
+import Tile from "./tile";
 
 interface IMap {
   canvas: HTMLCanvasElement;
@@ -31,6 +29,8 @@ class MapClass {
 
   private readonly players?: Player[];
 
+  private tiles: Tile[] = [];
+
   private readonly cameraPosition: IPosition = {
     xPos: ZERO,
     yPos: ZERO,
@@ -43,6 +43,8 @@ class MapClass {
     yPos: ZERO,
   };
 
+  private readonly pattern?: CanvasPattern | null;
+
   private initialCameraPosition: IPosition = {
     xPos: ZERO,
     yPos: ZERO,
@@ -54,6 +56,14 @@ class MapClass {
     this.room = room;
     this.players = players;
     this.addEventListeners();
+
+    document.addEventListener("DOMContentLoaded", () => {
+      void this.draw();
+
+      for (const player of this.players ?? []) {
+        player.draw();
+      }
+    });
   }
 
   private addEventListeners(): void {
@@ -94,8 +104,9 @@ class MapClass {
       this.initialCameraPosition.yPos - dy,
     );
 
-    void this.draw(); // Redraw the canvas with the new camera position
+    void this.draw();
 
+    // Redraw the canvas with the new camera position
     this.entityCanvas
       ?.getContext("2d")
       ?.clearRect(
@@ -170,63 +181,47 @@ class MapClass {
     return this.cameraPosition;
   }
 
-  private async drawHexagon(
-    ctx: CanvasRenderingContext2D,
-    xPos: number,
-    yPos: number,
-  ): Promise<void> {
-    const radius = TILE_SIZE / ONE_POINT_EIGHT;
-    const angleStep = Math.PI / THREE;
-
-    // eslint-disable-next-line max-statements
-    await new Promise<void>((resolve) => {
-      ctx.beginPath();
-
-      // Start from the top point
-      for (let index = ZERO; index < HEXAGON_SIDES; index += 1) {
-        const angle = angleStep * index - Math.PI / TWO; // Offset by 90 degrees to start from the top
-        const vertexX = xPos + radius * Math.cos(angle);
-        const vertexY = yPos + radius * Math.sin(angle);
-
-        if (index === ZERO) {
-          ctx.moveTo(vertexX, vertexY);
-        } else {
-          ctx.lineTo(vertexX, vertexY);
-        }
-      }
-
-      ctx.closePath();
-      ctx.fillStyle = "green";
-      ctx.fill();
-      ctx.stroke();
-      ctx.font = "12px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = "white";
-      ctx.fillText(`gx: ${xPos}, gy: ${yPos}`, xPos, yPos);
-      ctx.stroke();
-
-      // set border
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      resolve();
-    });
-  }
-
   private async drawGrid(ctx: CanvasRenderingContext2D): Promise<void> {
-    const promises: Promise<void>[] = [];
+    const tiles: Tile[] = [];
 
-    for (let gy = ZERO; gy < MAP_HEIGHT; gy += 1) {
-      for (let gx = ZERO; gx < MAP_WIDTH; gx += 1) {
-        const { xPos, yPos } = this.calculateHexagonPosition(gx, gy);
+    if (this.tiles.length === 0) {
+      for (let gy = ZERO; gy < MAP_HEIGHT; gy += 1) {
+        for (let gx = ZERO; gx < MAP_WIDTH; gx += 1) {
+          const { xPos, yPos } = this.calculateHexagonPosition(gx, gy);
 
-        // Check if the hexagon is more than 300px offscreen
-        if (!this.isHexagonOffscreen(ctx, xPos, yPos)) {
-          promises.push(this.drawHexagon(ctx, xPos, yPos));
+          // Check if the hexagon is more than 300px offscreen
+          if (!this.isHexagonOffscreen(ctx, xPos, yPos)) {
+            tiles.push(
+              new Tile({
+                canvas: this.canvas,
+                id: `${gx}-${gy}`,
+                map: this,
+
+                name: "Grass Tile",
+
+                position: {
+                  gx,
+                  gy,
+                },
+
+                size: {
+                  height: TILE_SIZE,
+                  width: TILE_SIZE,
+                },
+
+                texture: "/img/tiles/grass.png",
+              }),
+            );
+          }
         }
       }
+
+      this.tiles = tiles;
     }
+
+    const promises = this.tiles.map(async (tile) => {
+      await tile.draw();
+    });
 
     await Promise.all(promises);
   }
@@ -243,9 +238,7 @@ class MapClass {
 
     await this.drawGrid(ctx);
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelector("#root")?.append(this.canvas);
-    });
+    document.querySelector("#root")?.append(this.canvas);
   }
 }
 

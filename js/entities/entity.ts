@@ -30,8 +30,6 @@ class Entity {
     gy: ZERO,
   };
 
-  private texture?: string;
-
   public constructor({ canvas, id, name, position, size }: Readonly<IEntity>) {
     this.id = id;
     this.name = name;
@@ -50,14 +48,6 @@ class Entity {
 
   public getPosition(): ITilePosition {
     return this.position;
-  }
-
-  public getTexture(): string | undefined {
-    return this.texture;
-  }
-
-  public setTexture(texture: string): void {
-    this.texture = texture;
   }
 
   public setPosition(position: ITilePosition): void {

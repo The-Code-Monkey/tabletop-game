@@ -60,8 +60,6 @@ class GamePanel {
         document.querySelector("#root")?.append(this.canvas);
       });
 
-      void this.map.draw();
-
       for (const player of this.players) {
         player.setMap(this.map);
       }

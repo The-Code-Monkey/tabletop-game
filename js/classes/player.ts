@@ -27,20 +27,14 @@ class Player extends PlayerEntity {
   }
 
   public draw(): void {
-    console.log("draw player");
-
     if (this.map) {
       const { gx, gy } = this.getPosition();
-
-      console.log(gx, gy);
 
       const { xPos, yPos } = calculateHexagonPosition(
         gx,
         gy,
         this.map.getCameraPosition(),
       );
-
-      console.log(xPos, yPos);
 
       const { height, width } = this.getSize();
 
