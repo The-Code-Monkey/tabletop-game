@@ -1,9 +1,12 @@
-import type { IPosition } from "../types";
+import type { IEntitySize, ITilePosition } from "../types";
+import { ZERO } from "../utils/constants";
 
 interface IEntity {
+  canvas: HTMLCanvasElement;
   id: string;
   name: string;
-  position: IPosition;
+  position: ITilePosition;
+  size: IEntitySize;
 }
 
 class Entity {
@@ -11,21 +14,30 @@ class Entity {
     return new Entity(data);
   }
 
+  private readonly canvas: HTMLCanvasElement;
+
   private readonly id: string;
 
   private readonly name: string;
 
-  private position: Readonly<{
-    xPos: number;
-    yPos: number;
-  }>;
+  private size: IEntitySize = {
+    height: ZERO,
+    width: ZERO,
+  };
+
+  private position: ITilePosition = {
+    gx: ZERO,
+    gy: ZERO,
+  };
 
   private texture?: string;
 
-  public constructor({ id, name, position }: Readonly<IEntity>) {
+  public constructor({ canvas, id, name, position, size }: Readonly<IEntity>) {
     this.id = id;
     this.name = name;
     this.position = position;
+    this.canvas = canvas;
+    this.size = size;
   }
 
   public getId(): string {
@@ -36,7 +48,7 @@ class Entity {
     return this.name;
   }
 
-  public getPosition(): IPosition {
+  public getPosition(): ITilePosition {
     return this.position;
   }
 
@@ -48,8 +60,20 @@ class Entity {
     this.texture = texture;
   }
 
-  public setPosition(position: IPosition): void {
+  public setPosition(position: ITilePosition): void {
     this.position = position;
+  }
+
+  public getCanvas(): HTMLCanvasElement {
+    return this.canvas;
+  }
+
+  public getSize(): IEntitySize {
+    return this.size;
+  }
+
+  public setSize(size: IEntitySize): void {
+    this.size = size;
   }
 
   public update(): void {
@@ -64,11 +88,12 @@ class Entity {
     // Destroy the entity
   }
 
-  public toJson(): IEntity {
+  public toJson(): Omit<IEntity, "canvas"> {
     return {
       id: this.id,
       name: this.name,
       position: this.position,
+      size: this.size,
     };
   }
 }

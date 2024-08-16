@@ -17,16 +17,19 @@ import type Player from "./player";
 
 interface IMap {
   canvas: HTMLCanvasElement;
-  player?: Player;
+  entityCanvas?: HTMLCanvasElement;
+  players?: Player[];
   room?: string;
 }
 
 class MapClass {
   private readonly canvas: HTMLCanvasElement;
 
+  private readonly entityCanvas?: HTMLCanvasElement;
+
   private readonly room?: string;
 
-  private readonly player?: Player;
+  private readonly players?: Player[];
 
   private readonly cameraPosition: IPosition = {
     xPos: ZERO,
@@ -45,10 +48,11 @@ class MapClass {
     yPos: ZERO,
   };
 
-  public constructor({ canvas, player, room }: IMap) {
+  public constructor({ canvas, entityCanvas, players, room }: IMap) {
     this.canvas = canvas;
+    this.entityCanvas = entityCanvas;
     this.room = room;
-    this.player = player;
+    this.players = players;
     this.addEventListeners();
   }
 
@@ -91,6 +95,19 @@ class MapClass {
     );
 
     void this.draw(); // Redraw the canvas with the new camera position
+
+    this.entityCanvas
+      ?.getContext("2d")
+      ?.clearRect(
+        ZERO,
+        ZERO,
+        this.entityCanvas.width,
+        this.entityCanvas.height,
+      );
+
+    for (const player of this.players ?? []) {
+      player.draw();
+    }
   }
 
   private calculateHexagonPosition(gx: number, gy: number): IPosition {
@@ -147,6 +164,10 @@ class MapClass {
     ctx.canvas.width = width;
     ctx.canvas.height = height;
     ctx.canvas.style.backgroundColor = String(CANVAS_BACKGROUND_COLOR);
+  }
+
+  public getCameraPosition(): IPosition {
+    return this.cameraPosition;
   }
 
   private async drawHexagon(

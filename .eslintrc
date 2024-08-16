@@ -20,6 +20,7 @@
     "compat/compat": "off",
     "@typescript-eslint/prefer-readonly-parameter-types": "off",
     "promise/avoid-new": "off",
+    "func-style": "off",
     "@typescript-eslint/naming-convention": [
       "error",
       {

@@ -1,22 +1,53 @@
 import PlayerEntity, { type IPlayerEntity } from "../entities/playerEntity";
-import type { IPosition } from "../types";
+import type { ITilePosition } from "../types";
+import { TWO } from "../utils/constants";
+import { calculateHexagonPosition } from "../utils/positionHelpers";
+import type MapClass from "./map";
 
-type IPlayer = Omit<IPlayerEntity, "id" | "position">;
+interface IPlayer extends Omit<IPlayerEntity, "id" | "position"> {
+  map?: MapClass;
+}
 
-const position: Readonly<IPosition> = {
-  xPos: 0,
-  yPos: 0,
+const position: Readonly<ITilePosition> = {
+  gx: 0,
+  gy: 0,
 };
 
 class Player extends PlayerEntity {
   private exp = 0;
 
-  public constructor(props: Readonly<IPlayer>) {
+  private map?: MapClass;
+
+  public constructor({ ...props }: Readonly<IPlayer>) {
     super({
       ...props,
       id: "player",
       position,
     });
+  }
+
+  public draw(): void {
+    console.log("draw player");
+
+    if (this.map) {
+      const { gx, gy } = this.getPosition();
+
+      console.log(gx, gy);
+
+      const { xPos, yPos } = calculateHexagonPosition(
+        gx,
+        gy,
+        this.map.getCameraPosition(),
+      );
+
+      console.log(xPos, yPos);
+
+      const { height, width } = this.getSize();
+
+      this.getCanvas()
+        .getContext("2d")
+        ?.fillRect(xPos - width / TWO, yPos - height / TWO, width, height);
+    }
   }
 
   public getExp(): number {
@@ -29,6 +60,14 @@ class Player extends PlayerEntity {
 
   private addExp(exp: number): void {
     this.setExp(this.exp + exp);
+  }
+
+  public setMap(map: MapClass): void {
+    this.map = map;
+  }
+
+  public getMap(): MapClass | undefined {
+    return this.map;
   }
 }
 
